@@ -6,6 +6,7 @@ A GitHub Repository Listing Page made using HTML, CSS, JavaScript and GitHub RES
 
 - Search GitHub Users
 - View Profile
+- Dark / Light Theme Toggle
 - View Public Repositories
 - Skeleton Loaders
 - Selected Number of Repositories to Display Per Page
