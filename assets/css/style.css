@@ -802,28 +802,6 @@ body {
   color: var(--alpha-80);
 }
 
-.follower-card {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing);
-  padding: var(--spacing);
-}
-
-.follower-card .avatar-circle {
-  width: 56px;
-  height: 56px;
-  flex-shrink: 0;
-}
-
-.follower-card .icon-btn {
-  margin-inline-start: auto;
-}
-
-.follower-card .card-title {
-  font-size: var(--body);
-  font-weight: var(--weight-regular);
-}
-
 .error {
   position: fixed;
   top: var(--header-height);
@@ -856,8 +834,7 @@ body {
   color: var(--on-surface-2);
 }
 
-.repo-skeleton,
-.follower-skeleton {
+.repo-skeleton {
   background-color: var(--alpha-5);
 }
 
@@ -880,14 +857,7 @@ body {
   flex-grow: 1;
 }
 
-.follower-skeleton {
-  display: flex;
-  align-items: center;
-  padding: var(--spacing);
-  gap: var(--spacing);
-}
-
-.follower-skeleton .avatar-skeleton {
+.avatar-skeleton {
   width: 56px;
   height: 56px;
   flex-shrink: 0;
@@ -903,7 +873,6 @@ body {
 .topic {
   background-color: var(--primary);
   border-radius: var(--radius-12);
-  /* padding-inline: var(--spacing); */
   padding-inline: calc(var(--spacing) - 8px);
   padding-block: 8px;
   margin-block-start: var(--spacing);
@@ -1019,4 +988,95 @@ body {
   .tab-panel .card {
     max-width: calc(50% - 8px);
   }
+}
+
+.pagination-header {
+  width: 90%;
+  height: 100px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.items-controller,
+.search {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+select {
+  padding: 2px;
+  margin: 0 10px;
+  outline: none;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+}
+
+.search > input {
+  padding: 8px;
+  border: none;
+  outline: none;
+  margin: 0 0 0 20px;
+  background: white;
+}
+
+.pagination-bottom-field {
+  width: 90%;
+  height: auto;
+  margin: auto;
+}
+
+.bottom-field {
+  width: 100%;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pagination li {
+  padding: 2px;
+  margin: 10px;
+  flex-shrink: 0;
+  text-align: center;
+  border-radius: var(--radius-8);
+  border: 1px solid var(--background);
+  color: var(--on-background);
+}
+
+.pagination li:hover {
+  border-color: var(--on-background);
+}
+
+.pagination li.active {
+  background: var(--primary);
+  color: var(--white);
+  border-color: var(--background);
+}
+
+.pagination li a {
+  text-decoration: none;
+  color: inherit;
+  padding: 3px 8px;
+  display: block;
+  font-family: "Poppins" sans-serif;
+  font-size: var(--base-primary);
+}
+
+h5 {
+  font-family: "Poppins" sans-serif;
+  font-size: var(--base-primary);
+}
+
+#itemperpage option {
+  font-family: "Poppins" sans-serif;
+  background-color: var(--background);
 }

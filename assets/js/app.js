@@ -63,9 +63,7 @@ addEventOnElements($tabBtns, "keydown", function (e) {
 const $searchSubmit = document.querySelector("[data-search-submit]");
 let apiUrl = "https://api.github.com/users/iamatifmoin";
 
-let repoUrl,
-  followerUrl,
-  followingUrl = "";
+let repoUrl = "";
 
 const searchUser = function () {
   if (!$searchField.value) return;
@@ -83,6 +81,7 @@ const $profileCard = document.querySelector("[data-profile-card]");
 const $repoPanel = document.querySelector("[data-repo-panel]");
 
 const $error = document.querySelector("[data-error]");
+var num_of_data = 0;
 
 window.updateProfile = function (profileUrl) {
   $error.style.display = "none";
@@ -130,14 +129,12 @@ window.updateProfile = function (profileUrl) {
         public_repos,
         followers,
         following,
-        followers_url,
-        following_url,
         repos_url,
       } = data;
 
       repoUrl = repos_url;
-      followerUrl = followers_url;
-      followingUrl = following_url.replace("{/other_user}", "");
+
+      num_of_data = public_repos;
 
       $profileCard.innerHTML = `
     <figure class="${
@@ -221,6 +218,7 @@ window.updateProfile = function (profileUrl) {
     </div>
     `;
       updateRepository();
+      pageGenerator(itemPerPage);
     },
     () => {
       $error.style.display = "grid";
@@ -234,30 +232,30 @@ window.updateProfile = function (profileUrl) {
 };
 
 updateProfile(apiUrl);
-let forkedRepos = [];
 const updateRepository = function () {
-  fetchData(`${repoUrl}?sort=created&per_page=42`, function (data) {
-    $repoPanel.innerHTML = `
+  fetchData(
+    `${repoUrl}?sort=created&per_page=${itemPerPage}&page=${pageNumber}`,
+    function (data) {
+      $repoPanel.innerHTML = `
     <h2 class="sr-only">Repositories</h2>
     `;
-    forkedRepos = data.filter((item) => item.fork);
-    const repositories = data.filter((i) => !i.fork);
-    if (repositories.length) {
-      for (const repo of repositories) {
-        const {
-          name,
-          html_url,
-          description,
-          private: isPrivate,
-          language,
-          stargazers_count: stars_count,
-          forks_count,
-          topics,
-        } = repo;
+      const repositories = data;
+      if (repositories.length) {
+        for (const repo of repositories) {
+          const {
+            name,
+            html_url,
+            description,
+            private: isPrivate,
+            language,
+            stargazers_count: stars_count,
+            forks_count,
+            topics,
+          } = repo;
 
-        const $repoCard = document.createElement("article");
-        $repoCard.classList.add("card", "repo-card");
-        $repoCard.innerHTML = `
+          const $repoCard = document.createElement("article");
+          $repoCard.classList.add("card", "repo-card");
+          $repoCard.innerHTML = `
         <div class="card-body">
             <a href="${html_url}" target="_blank" class="card-title">
                 <h3 class="title-3">${name}</h3>
@@ -321,205 +319,66 @@ const updateRepository = function () {
             
         </div>
         `;
-        $repoPanel.appendChild($repoCard);
-      }
-    } else {
-      $repoPanel.innerHTML = `
+          $repoPanel.appendChild($repoCard);
+        }
+      } else {
+        $repoPanel.innerHTML = `
         <div class="error-content">
             <p class="title-1">Oops!</p>
             <p class="text">User does not have any public repositories yet.</p>
         </div>
         `;
+      }
     }
-  });
+  );
 };
 
-const $forkPanel = document.querySelector("[data-fork-panel]");
-const $forkTabBtn = document.querySelector("[data-forked-tab-btn]");
+var itemShow = document.querySelector("#itemperpage");
+var itemPerPage = 10;
 
-const updateForkRepo = function () {
-  $forkPanel.innerHTML = `
-    <h2 class="sr-only">Forked Repositories</h2>
-    `;
+itemShow.onchange = giveItemPerPage;
 
-  if (forkedRepos.length) {
-    for (const repo of forkedRepos) {
-      const {
-        name,
-        html_url,
-        description,
-        private: isPrivate,
-        language,
-        stargazers_count: stars_count,
-        forks_count,
-        topics,
-      } = repo;
+function giveItemPerPage() {
+  itemPerPage = Number(this.value);
+  pageNumber = 1;
+  updateProfile(apiUrl);
+}
 
-      const $forkCard = document.createElement("article");
-      $forkCard.classList.add("card", "repo-card");
-      $forkCard.innerHTML = `
-          <div class="card-body">
-              <a href="${html_url}" target="_blank" class="card-title">
-                  <h3 class="title-3">${name}</h3>
-              </a>
-              ${
-                description
-                  ? `
-              <p class="card-text">${description}</p>
-              `
-                  : ""
-              }
-              <span class="badge">${isPrivate ? "Private" : "Public"}</span>
-          ${
-            topics
-              ? `
-          <div class="topics">
-              ${
-                topics[0]
-                  ? `
-              <span class="topic">${topics[0]}</span>
-              `
-                  : ""
-              }
-              ${
-                topics[1]
-                  ? `
-              <span class="topic">${topics[1]}</span>
-              `
-                  : ""
-              }
-              ${
-                topics[2]
-                  ? `
-              <span class="topic">${topics[2]}</span>
-              `
-                  : ""
-              }
-          </div>`
-              : ""
-          }
-          </div>
-          <div class="card-footer">
-          ${
-            language
-              ? `
-              <div class="meta-item">
-                  <span class="material-symbols-rounded" aria-hidden="true">code_blocks</span>
-                  <span class="span">${language}</span>
-              </div>
-              `
-              : ""
-          }
-              <div class="meta-item">
-                  <span class="material-symbols-rounded" aria-hidden="true">star_rate</span>
-                  <span class="span">${numberToKilo(stars_count)}</span>
-              </div>
-              <div class="meta-item">
-                  <span class="material-symbols-rounded" aria-hidden="true">family_history</span>
-                  <span class="span">${numberToKilo(forks_count)}</span>
-              </div>
-              
-          </div>
-          `;
-      $forkPanel.appendChild($forkCard);
-    }
+var pageUl = document.querySelector(".pagination");
+var load_count = 0;
+var pageNumber = 0;
+function pageGenerator(getem) {
+  if (num_of_data <= getem) {
+    pageUl.style.display = "none";
   } else {
-    $forkPanel.innerHTML = `
-          <div class="error-content">
-              <p class="title-1">Oops!</p>
-              <p class="text">User does not have any forked repositories yet.</p>
-          </div>
-          `;
+    load_count++;
+    if (load_count > 1) {
+      const pageNum = pageUl.querySelectorAll(".list");
+      pageNum.forEach((n) => n.remove());
+    }
+    pageUl.style.display = "flex";
+    const num_of_page = Math.ceil(num_of_data / getem);
+    for (let i = 0; i < num_of_page; i++) {
+      const li = document.createElement("li");
+      li.className = "list";
+      const a = document.createElement("a");
+      a.href = "#";
+      a.innerText = i + 1;
+      a.setAttribute("data-page", li);
+      a.setAttribute("value", i + 1);
+      a.addEventListener("click", () => {
+        pageNumber = a.innerText;
+        var inactivePages = pageUl.querySelectorAll(".list");
+        inactivePages.forEach((inactivePage) =>
+          inactivePage.classList.remove("active")
+        );
+        li.classList.add("active");
+        updateRepository();
+      });
+      li.appendChild(a);
+      pageUl.insertBefore(li, pageUl.querySelector(".next"));
+    }
+    var firstActivePage = pageUl.querySelectorAll(".list")[0];
+    firstActivePage.classList.add("active");
   }
-};
-
-$forkTabBtn.addEventListener("click", updateForkRepo);
-
-const $followerTabBtn = document.querySelector("[data-follower-tab-btn]");
-const $followerPanel = document.querySelector("[data-follower-panel]");
-
-const updateFollower = function () {
-  $followerPanel.innerHTML = `
-<div class="card follower-skeleton">
-    <div class="skeleton avatar-skeleton"></div>
-    <div class="skeleton title-skeleton"></div>
-</div>
-`.repeat(12);
-  fetchData(followerUrl, function (data) {
-    $followerPanel.innerHTML = `
-    <h2 class="sr-only">Followers</h2>
-    `;
-    if (data.length) {
-      for (const item of data) {
-        const { login: username, avatar_url, url } = item;
-        const $followerCard = document.createElement("article");
-        $followerCard.classList.add("card", "follower-card");
-        $followerCard.innerHTML = `
-            <figure class="avatar-circle img-holder">
-                <img src="${avatar_url}&s=64" width="56" height="56" loading="lazy" alt="${username}"
-                    class="img-cover">
-            </figure>
-            <h3 class="card-title">${username}</h3>
-            <button class="icon-btn" onclick="updateProfile(\'${url}\')" aria-label="Go to ${username} profile">
-               <span class="material-symbols-rounded" aria-hidden="true">link</span>
-            </button>
-            `;
-        $followerPanel.appendChild($followerCard);
-      }
-    } else {
-      $followerPanel.innerHTML = `
-        <div class="error-content">
-            <p class="title-1">Oops!</p>
-            <p class="text">User does not have any followers yet.</p>
-        </div>
-        `;
-    }
-  });
-};
-
-$followerTabBtn.addEventListener("click", updateFollower);
-
-const $followingTabBtn = document.querySelector("[data-following-tab-btn]");
-const $followingPanel = document.querySelector("[data-following-panel]");
-
-const updateFollowing = function () {
-  $followingPanel.innerHTML = `
-    <div class="card follower-skeleton">
-        <div class="skeleton avatar-skeleton"></div>
-        <div class="skeleton title-skeleton"></div>
-    </div>
-    `.repeat(12);
-  fetchData(followingUrl, function (data) {
-    $followingPanel.innerHTML = `
-        <h2 class="sr-only">Following</h2>
-        `;
-
-    if (data.length) {
-      for (const item of data) {
-        const { login: username, avatar_url, url } = item;
-        const $followingCard = document.createElement("article");
-        $followingCard.classList.add("card", "follower-card");
-        $followingCard.innerHTML = `
-            <figure class="avatar-circle img-holder">
-                <img src="${avatar_url}&s=64" width="56" height="56" loading="lazy" alt="${username}"
-                    class="img-cover">
-            </figure>
-            <h3 class="card-title">${username}</h3>
-            <button class="icon-btn" onclick="updateProfile(\'${url}\')" aria-label="Go to ${username} profile">
-                <span class="material-symbols-rounded" aria-hidden="true">link</span>
-            </button>
-        `;
-        $followingPanel.appendChild($followingCard);
-      }
-    } else {
-      $followingPanel.innerHTML = `
-            <div class="error-content">
-                <p class="title-1">Oops!</p>
-                <p class="text">User does not have any following yet.</p>
-            </div>
-        `;
-    }
-  });
-};
-
-$followerTabBtn.addEventListener("click", updateFollowing);
+}
